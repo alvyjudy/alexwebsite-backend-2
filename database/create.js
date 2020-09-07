@@ -31,8 +31,10 @@ module.exports = {
   );`,
   session: `CREATE TABLE IF NOT EXISTS session (
     user_id INT PRIMARY KEY,
-    token TEXT,
-    expiry INT
+    token_value TEXT UNIQUE,
+    expiry INT,
+    FOREIGN KEY (user_id) REFERENCES auth(user_id)
+    ON DELETE CASCADE
   );`,
   profile: `CREATE TABLE IF NOT EXISTS profile (
     user_id INT,

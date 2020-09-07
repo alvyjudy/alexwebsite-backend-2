@@ -30,13 +30,15 @@ test("register, insert session, remove", async ()=>{
   const client = await pool.connect();
   const ID = (await client.query(user.registerUser, USER)).rows[0].user_id;
   await client.query(user.insertSession, [ID, 'something', 1000]);
-  const {token, expiry} = (await client.query(user.getSession, [ID])).rows[0];
+  const {token_value: tokenValue, expiry} = (await client.query(user.getSession, [ID])).rows[0];
   await client.query(user.rmSession, [ID]);
   const empty = (await client.query(user.getSession, [ID])).rows;
   client.release();
-  expect(token).toBe('something');
+  expect(tokenValue).toBe('something');
   expect(expiry).toBe(1000);
   expect(empty).toEqual([]);
+
+  
 
 })
 
