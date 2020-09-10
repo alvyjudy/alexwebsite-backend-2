@@ -4,7 +4,6 @@ const cachedTokens = require("./cachedTokens.js");
 
 const verifyToken = async (tokenValue, userID) => { 
   let storedToken = cachedTokens.get(userID)
-  
   if (!storedToken) {
     const tokenInDB = (await pool.query(userDb.getSession, [userID])).rows[0];
     storedToken = {userID, 
