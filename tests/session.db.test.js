@@ -35,7 +35,7 @@ test("register, insert session, remove", async ()=>{
   const empty = (await client.query(user.getSession, [ID])).rows;
   client.release();
   expect(tokenValue).toBe('something');
-  expect(expiry).toBe(1000);
+  expect(expiry).toBe("1000");
   expect(empty).toEqual([]);
 
   
