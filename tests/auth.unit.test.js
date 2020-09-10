@@ -166,12 +166,12 @@ describe("test verifyToken, inexistent token", ()=>{
      const next = nextMock();
      const res = resMock();
      await auth.verifyEmailPw(req, res, next);
-     await auth.setToken(req, res, next).then(()=>{console.log('token set')});
+     await auth.setToken(req, res, next);
      req.tokenValue = undefined
    })
 
    afterAll(async ()=>{
-    await pool.query(user.rmSession, [USER2.userID]).then(()=>{console.log('removed')})
+    await pool.query(user.rmSession, [USER2.userID]);
    })
 
 
@@ -180,7 +180,6 @@ describe("test verifyToken, inexistent token", ()=>{
     const res = resMock();
     const next = nextMock();
     await auth.verifyToken(req, res, next)
-    await pool.query(`SELECT * FROM session;`).then((res)=>{console.log(res.rows)})
 
     expect(next).toHaveBeenCalledTimes(0)
     expect(res.status).toHaveBeenCalledTimes(1);
