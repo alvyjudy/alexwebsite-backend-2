@@ -5,8 +5,6 @@ const user = require("../database/user.js");
 require("dotenv").config({path:path.resolve(path.dirname(__filename), ".env")});
 
 const SCHEMA = "test_schema_checkout";
-
-
 const pool = new Pool();
 
 beforeAll(async ()=>{
