@@ -32,7 +32,7 @@ module.exports = {
   session: `CREATE TABLE IF NOT EXISTS session (
     user_id INT PRIMARY KEY,
     token_value TEXT UNIQUE,
-    expiry INT,
+    expiry TEXT,
     FOREIGN KEY (user_id) REFERENCES auth(user_id)
     ON DELETE CASCADE
   );`,
