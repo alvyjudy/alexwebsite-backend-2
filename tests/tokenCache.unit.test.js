@@ -1,5 +1,4 @@
-const CachedTokens = require("../server/cachedTokens.js")
-const cachedTokens = CachedTokens();
+const cachedTokens = require("../server/cachedTokens.js")
 
 afterEach(()=>{
   cachedTokens.flush()
