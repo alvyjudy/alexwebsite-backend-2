@@ -68,9 +68,8 @@ describe("register user", ()=>{
 
   test("", async ()=>{
     expect(req.userID).toBeUndefined();
-    await auth.registerUser(req, res, next);
+    await auth.registerUser()(req, res, next);
     const userID = res.userID;
-    console.log(userID)
     expect(next).toHaveBeenCalledTimes(0);
     expect(res.status).toHaveBeenCalledWith(200);
     

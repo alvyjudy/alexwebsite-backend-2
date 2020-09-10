@@ -93,7 +93,7 @@ describe("test verifyEmailPw", ()=>{
     const req = reqMock(USER1.cred[0], USER1.cred[1], undefined, undefined)
     const res = resMock();
     const next = nextMock();
-    await auth.verifyEmailPw(req, res, next);
+    await auth.verifyEmailPw()(req, res, next);
     expect(next).toHaveBeenCalledTimes(1);
     expect(req.userID).toBe(USER1.userID);
   })
@@ -102,7 +102,7 @@ describe("test verifyEmailPw", ()=>{
     const req = reqMock(USER1.cred[0], "random", undefined, undefined)
     const res = resMock();
     const next = nextMock();
-    await auth.verifyEmailPw(req, res, next);
+    await auth.verifyEmailPw()(req, res, next);
     expect(next).toHaveBeenCalledTimes(0);
     
   })
@@ -117,7 +117,7 @@ describe("user1, test setToken", ()=>{
     const req = reqMock(undefined, undefined, undefined, undefined, USER1.userID);
     const res = resMock();
     const next = nextMock();
-    await auth.setToken(req, res, next);
+    await auth.setToken()(req, res, next);
     expect(req.tokenValue).toBeDefined();
     expect(req.tokenExpiry).toBeDefined();
     const {token_value: tokenValue, expiry: tokenExpiry} = (
@@ -143,15 +143,15 @@ describe("test verifyToken, valid token", ()=>{
   beforeAll(async () =>{
     const next = nextMock();
     const res = resMock();
-    await auth.verifyEmailPw(req, res, next);
-    await auth.setToken(req, res, next);
+    await auth.verifyEmailPw()(req, res, next);
+    await auth.setToken()(req, res, next);
   })
 
 
   test("", async () =>{
     const res = resMock();
     const next = nextMock();
-    await auth.verifyToken(req, res, next);
+    await auth.verifyToken()(req, res, next);
     expect(next).toHaveBeenCalledTimes(1)
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(res.send).toHaveBeenCalledTimes(0);
@@ -165,8 +165,8 @@ describe("test verifyToken, inexistent token", ()=>{
   beforeAll(async () =>{
      const next = nextMock();
      const res = resMock();
-     await auth.verifyEmailPw(req, res, next);
-     await auth.setToken(req, res, next);
+     await auth.verifyEmailPw()(req, res, next);
+     await auth.setToken()(req, res, next);
      req.tokenValue = undefined
    })
 
@@ -179,7 +179,7 @@ describe("test verifyToken, inexistent token", ()=>{
     expect(1).toBe(1);
     const res = resMock();
     const next = nextMock();
-    await auth.verifyToken(req, res, next)
+    await auth.verifyToken()(req, res, next)
 
     expect(next).toHaveBeenCalledTimes(0)
     expect(res.status).toHaveBeenCalledTimes(1);
@@ -196,8 +196,8 @@ describe("test verifyToken, invalid token", ()=>{
   beforeAll(async () =>{
      const next = nextMock();
      const res = resMock();
-     await auth.verifyEmailPw(req, res, next);
-     await auth.setToken(req, res, next);
+     await auth.verifyEmailPw()(req, res, next);
+     await auth.setToken()(req, res, next);
      req.tokenValue = "randomvalue"
    })
 
@@ -210,7 +210,7 @@ describe("test verifyToken, invalid token", ()=>{
     expect(1).toBe(1);
     const res = resMock();
     const next = nextMock();
-    await auth.verifyToken(req, res, next)
+    await auth.verifyToken()(req, res, next)
     expect(next).toHaveBeenCalledTimes(0)
     expect(res.status).toHaveBeenCalledTimes(1);
     expect(res.send).toHaveBeenCalledTimes(1);
