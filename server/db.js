@@ -10,9 +10,8 @@ module.exports = {
       console.log("Query failed to execute:", 
         "\u001b[31;1m", text, "\u001b[0;m",
         "params:", params, "\n\nError message", e);
-    } finally {
-      return res
     }
+    return res
   },
   connect: ()=> {
     return pool.connect()
