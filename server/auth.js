@@ -2,7 +2,13 @@ const pool = require("./db.js");
 const tokenStore = require("./tokenStore.js");
 const user = require("../database/user.js");
 
-
+const registerUser = async (req, res, next) => {
+  const email = req.body.email;
+  const pw = req.body.password;
+  const userID = (await pool.query(user.registerUser, [email, pw])).rows[0].user_id
+  
+  res.status(200).send(userID);
+}
 
 const verifyEmailPw = async (req, res, next) => {
   const email = req.body.email
@@ -49,4 +55,4 @@ const verifyToken = async (req, res, next) => {
   }
 }
 
-module.exports = {verifyEmailPw, setToken, verifyToken}
+module.exports = {registerUser, verifyEmailPw, setToken, verifyToken}
