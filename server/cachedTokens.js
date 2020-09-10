@@ -26,4 +26,6 @@ const CachedTokens = () => {
   return instance
 }
 
-module.exports = CachedTokens;
+cachedTokens = CachedTokens();
+
+module.exports = cachedTokens;
