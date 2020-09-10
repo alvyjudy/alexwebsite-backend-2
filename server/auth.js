@@ -6,16 +6,13 @@ const registerUser = () => async (req, res, next) => {
   const email = req.body.email;
   const pw = req.body.password;
   const userID = (await pool.query(user.registerUser, [email, pw])).rows[0].user_id
-  
-  res.status(200).send(userID);
+  res.status(200).send(userID.toString());
 }
 
 const verifyEmailPw = () => async (req, res, next) => {
   const email = req.body.email
   const pw = req.body.password
-  
   const authStatus = (await pool.query(user.loginUser, [email, pw])).rows[0]
-
   if (authStatus) {
     req.userID = authStatus.user_id;
     next();
