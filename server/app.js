@@ -4,7 +4,7 @@ const pool = require("./db.js");
 const auth = require("./auth.js");
 const dbUser = require('../database/user.js');
 
-app.get('/', (req, res)=>{
+app.get('/ping', (req, res)=>{
   res.status(200).send("Hello world");
 })
 
@@ -16,16 +16,25 @@ app.get("/time", async (req, res)=>{
   client.release();
 })
 
-app.get("/login", 
+app.post("/register",
+  express.json(),
+  auth.registerUser()
+)
+
+app.post("/login", 
   express.json(), 
-  auth.verifyEmailPw,
-  auth.setToken,
+  auth.verifyEmailPw(),
+  auth.setToken(),
   (req, res) => {
-    res.status(200).send(req.token);
+    res.status(200).send(req.tokenValue.toString());
   }
 )
 
-app.get("/cart", )
-  
+app.post("/check-token",
+  auth.verifyToken(),
+  (req, res) => {
+    res.status(200).send("Valid token")
+  }
+)
 
 module.exports = app;
