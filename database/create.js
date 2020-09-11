@@ -9,6 +9,7 @@ module.exports = {
     user_id INT,
     count INT,
     FOREIGN KEY (user_id) REFERENCES auth(user_id)
+    ON DELETE CASCADE
   );`,
   orders: `CREATE TABLE IF NOT EXISTS orders (
     order_id serial PRIMARY KEY,
@@ -16,6 +17,7 @@ module.exports = {
     address TEXT NOT NULL,
     payment_id TEXT NOT NULL UNIQUE,
     FOREIGN KEY (user_id) REFERENCES auth(user_id)
+    ON DELETE CASCADE
   );`,
   checkedOut: `CREATE TABLE IF NOT EXISTS checked_out (
     item_id INT PRIMARY KEY,
