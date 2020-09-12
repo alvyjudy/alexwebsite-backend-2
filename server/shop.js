@@ -13,23 +13,22 @@ const _getUserCart = async (userID) => {
 }
 
 const getUserCart = () => async (req, res, next) => {
-  if (!req.userID || false) {
+  if (!req.get('User-ID') || false) {
     res.status(400).send("User ID not included") 
   } else {
-    const cart = await _getUserCart(req.userID)
-    console.log(cart);
+    const cart = await _getUserCart(req.get('User-ID'))
     res.status(200).json(cart)
   }
 }
 
 const updateUserCart = () => async (req, res, next) => {
   const newCart = req.body.cartItems;
-  const userID = req.userID;
+  const userID = req.get('User-ID');
 
   if (!newCart) {
     res.status(400).send("Cart items not received")
   }
-  if (userID || false) {
+  if (!userID || false) {
     res.status(400).send("User ID not included")
   }
 
