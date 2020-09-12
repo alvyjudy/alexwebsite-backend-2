@@ -25,10 +25,7 @@ app.post("/register",
 app.post("/login", 
   express.json(), 
   auth.verifyEmailPw(),
-  auth.setToken(),
-  (req, res) => {
-    res.status(200).send(req.tokenValue.toString());
-  }
+  auth.setToken()
 )
 
 app.post("/check-token",

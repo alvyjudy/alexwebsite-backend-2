@@ -5,6 +5,7 @@ const user = require("../database/user.js");
 const registerUser = () => async (req, res, next) => {
   const email = req.body.email;
   const pw = req.body.password;
+  if (!email || !pw) {res.status(400).send("missing email or pw")}
   const userID = (await pool.query(user.registerUser, [email, pw])).rows[0].user_id
   res.status(200).send(userID.toString());
 }
@@ -12,6 +13,10 @@ const registerUser = () => async (req, res, next) => {
 const verifyEmailPw = () => async (req, res, next) => {
   const email = req.body.email
   const pw = req.body.password
+  if (!email || !pw) {
+    console.log("Email or pw not found in request body")
+    res.status(400).send("Email or pw not found in request body")
+  }
   const authStatus = (await pool.query(user.loginUser, [email, pw])).rows[0]
   if (authStatus) {
     req.userID = authStatus.user_id;
@@ -28,19 +33,21 @@ const tokenGen = (userID) => {
 }
 
 const setToken = () => async (req, res, next) => {
-
+  const userID = req.userID
+  if (!userID) {res.status(400).send("User-ID not found in req.userID")}
   const {tokenValue, tokenExpiry} = tokenGen();
-  await pool.query(user.insertSession, [req.userID, tokenValue, tokenExpiry]);
+  await pool.query(user.insertSession, [userID, tokenValue, tokenExpiry]);
   
-  req.tokenValue = tokenValue;
-  req.tokenExpiry = tokenExpiry;
-  next()
+  res.status(200).json(tokenValue.toString())
 }
 
 const verifyToken = () => async (req, res, next) => {
-  const tokenValue = req.get("tokenValue")
-  const userID = req.get("userID")
-  if (!tokenValue) {
+  const tokenValue = req.get("Token-Value")
+  const userID = req.get("User-ID")
+  if (!userID) {
+    console.log("userID not included in header")
+    res.status(403).send("userID not included in header")
+  } else if (!tokenValue) {
     res.status(403).send("token header not included");
   } else {
     const validity = await tokenStore.verifyToken(tokenValue, userID);
