@@ -14,7 +14,7 @@ const pool = require("../server/db.js");
 const server = app.listen();
 const httpTerminator = createHttpTerminator({server});
 const ENDPOINT = "http://localhost:" + server.address().port;
-const SCHEMA = "test_setup";
+const SCHEMA = "test_auth_server";
 
 beforeAll(async ()=>{
   const client = await pool.connect();
