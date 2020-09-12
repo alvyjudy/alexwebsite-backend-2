@@ -45,10 +45,9 @@ const verifyToken = () => async (req, res, next) => {
   const tokenValue = req.get("Token-Value")
   const userID = req.get("User-ID")
   if (!userID) {
-    console.log("userID not included in header")
     res.status(403).send("userID not included in header")
   } else if (!tokenValue) {
-    res.status(403).send("token header not included");
+    res.status(403).send("Token header not included");
   } else {
     const validity = await tokenStore.verifyToken(tokenValue, userID);
     if (validity) {
