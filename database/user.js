@@ -19,7 +19,7 @@ module.exports = {
     WHERE email = $1;`,
 
   addItemToCart: `INSERT INTO cart 
-  (item_id, user_id, count) 
+  (user_id, item_id, count) 
   VALUES ($1, $2, $3);`,
 
   removeItemFromCart:`DELETE FROM cart WHERE item_id = $1;`,

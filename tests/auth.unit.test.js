@@ -1,49 +1,44 @@
+//turn off logging: 
+console.log = () =>{}
+
 const pool = require("../server/db.js");
 const path = require("path");
 require("dotenv").config({path:path.resolve(path.dirname(__filename), ".env")});
 const create = require("../database/create.js");
 const user = require("../database/user.js")
 const auth = require("../server/auth.js");
-const cachedTokens = require("../server/cachedTokens.js");
+const {getMockRes: resMock} = require('@jest-mock/express')
 
-const USER1 = {
-  cred: ['user1@gmail.com', 'abcd'],
-  id: undefined,
-  token: undefined
-}
 
-const USER2 = {
-  cred: ['user2@gmail.com', 'abcd'],
-  id: undefined,
-  token: undefined
-}
-
-const USER3 = {
-  cred: ['user3@gmail.com', 'abcd'],
-  id: undefined,
-  token: undefined
-}
-
-const reqMock = (email, password, tokenValue, tokenExpiry, userID) => {
-  const reqObj = {
-    body: {email, password},
-    tokenValue,
-    tokenExpiry,
+const reqMock = (valuePair) => {
+  const {email, 
+    password, 
+    tokenValue, 
+    tokenExpiry, 
     userID,
-    get: (field)=>reqObj[field]
+    cartItems
+  } = valuePair;
+
+  const get = (field) => {
+    return reqObj.headers[field]
   }
+
+  const reqObj = {
+    body:{
+      email: email,
+      password: password,
+      cartItems
+    },
+    headers:{
+      "Token-Value": tokenValue,
+      "User-ID": userID,
+      "Content-Type": "application/json"
+    },
+    get
+  }
+  
   return reqObj
 }
-
-const resMock = () => {
-  const send = jest.fn(() => {})
-  return {
-    status: jest.fn(() => {return {send}}),
-    send
-  }
-}
-
-const nextMock = () => jest.fn(()=>{})
 
 const SCHEMA = "test_schema_auth_unit";
 
@@ -59,10 +54,6 @@ beforeAll(async ()=>{
       client.query(action)
     }
   )
-
-  USER1.userID = (await client.query(user.registerUser, USER1.cred)).rows[0].user_id
-  USER2.userID = (await client.query(user.registerUser, USER2.cred)).rows[0].user_id
-  USER3.userID = (await client.query(user.registerUser, USER3.cred)).rows[0].user_id
   await client.release();
 })
 
@@ -72,149 +63,198 @@ afterAll(async ()=>{
 })
 
 
+describe("test verifyEmailPw middleware", ()=>{
+  const USER = {
+    email: 'user1@gmail.com', 
+    password: 'abcd',
+    userID: undefined,
+    token: undefined
+  }
 
-test("test mock", async ()=>{
-  const next = nextMock();
-  next();
-  expect(next).toHaveBeenCalledTimes(1);
-})
+  beforeEach(async()=>{
+    //register user
+    await pool
+      .query(user.registerUser, [USER.email, USER.password])
+      .then(res=>{
+        USER.userID = res.rows[0].user_id
+        console.log("User registered, userID:", USER.userID)
+      })
+      .catch(e=>{console.log("User registration failed:", e)})
+  })
 
-test("check id", ()=>{
-  expect(USER1.userID).toBe(1);
-  expect(USER2.userID).toBe(2);
-  expect(USER3.userID).toBe(3);
-})
+  afterEach(async ()=>{
+    await pool
+    .query(`DELETE FROM auth WHERE user_id = $1`, [USER.userID])
+    .then(()=>{
+      USER1.userID = undefined
+      console.log("userID cleared:", USER1.userID)
+    })
+    .catch(e=>{console.log("delete user auth failed")})
 
+  await pool
+    .query(`SELECT * FROM auth;`)
+    .then(res=>{console.log("auth table should be empty:", res.rows)})
 
+  })
 
-
-describe("test verifyEmailPw", ()=>{
   test("user 1, correct email, correct password", async ()=>{
-    const req = reqMock(USER1.cred[0], USER1.cred[1], undefined, undefined)
-    const res = resMock();
-    const next = nextMock();
-    await auth.verifyEmailPw()(req, res, next);
+    const req = reqMock({
+      email: USER.email,
+      password: USER.password
+    })
+    const {res, next} = resMock();
+    await auth.verifyEmailPw()(req, res, next);//TEST!
     expect(next).toHaveBeenCalledTimes(1);
-    expect(req.userID).toBe(USER1.userID);
+    expect(req.userID).toBe(USER.userID);
   })
 
   test("user 1, correct email, incorrect password", async ()=>{
-    const req = reqMock(USER1.cred[0], "random", undefined, undefined)
-    const res = resMock();
-    const next = nextMock();
+    const req = reqMock({
+      email: USER.email,
+      password: "random"
+    })
+    const {res, next} = resMock();
     await auth.verifyEmailPw()(req, res, next);
     expect(next).toHaveBeenCalledTimes(0);
     
   })
 })
 
-describe("user1, test setToken", ()=>{
-  afterEach(async () => {
-    await pool.query(user.rmSession, [USER1.userID])
+describe("user1, test setToken middleware", ()=>{
+  const USER = {
+    email: 'user1@gmail.com', 
+    password: 'abcd',
+    userID: undefined,
+    token: undefined
+  }
+
+  beforeEach(async()=>{
+    //register user
+    await pool
+      .query(user.registerUser, [USER.email, USER.password])
+      .then(res=>{
+        USER.userID = res.rows[0].user_id
+        console.log("User registered, userID:", USER.userID)
+      })
+      .catch(e=>{console.log("User registration failed:", e)})
   })
+
+  afterEach(async ()=>{
+    await pool
+    .query(`DELETE FROM auth WHERE user_id = $1`, [USER.userID])
+    .then(()=>{
+      USER1.userID = undefined
+      console.log("userID cleared:", USER1.userID)
+    })
+    .catch(e=>{console.log("delete user auth failed")})
+
+  await pool
+    .query(`SELECT * FROM auth;`)
+    .then(res=>{console.log("auth table should be empty:", res.rows)})
+
+  })
+
 
   test("set token", async () => {
-    const req = reqMock(undefined, undefined, undefined, undefined, USER1.userID);
-    const res = resMock();
-    const next = nextMock();
-    await auth.setToken()(req, res, next);
-    expect(req.tokenValue).toBeDefined();
-    expect(req.tokenExpiry).toBeDefined();
+    const req = reqMock({})
+    req.userID = USER.userID
+    const {res, next} = resMock();
+    await auth.setToken()(req, res, next); //TEST middleware
+
     const {token_value: tokenValue, expiry: tokenExpiry} = (
-      await pool.query(user.getSession, [USER1.userID])
-    ).rows[0]
-    expect(tokenValue).toBe(req.tokenValue.toString());
-    expect(tokenExpiry).toBe(req.tokenExpiry.toString());
+      await pool.query(user.getSession, [USER.userID])
+    ).rows[0] 
+    
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(tokenValue.toString())
   })
 })
 
-test("mock res", ()=>{
-    const res = resMock();
-    res.status(403).send('hello');
-    res.send('hi')
-    res.status(403)
-    expect(res.status).toHaveBeenCalledTimes(2);
-    expect(res.send).toHaveBeenCalledTimes(2);
-})
 
-describe("test verifyToken, valid token", ()=>{
-  const req = reqMock(USER1.cred[0], USER1.cred[1])
+describe("test verifyToken middleware", ()=>{
+  const USER = {
+    email: 'user1@gmail.com', 
+    password: 'abcd',
+    userID: undefined,
+    tokenValue: undefined
+  }
 
-  beforeAll(async () =>{
-    const next = nextMock();
-    const res = resMock();
-    await auth.verifyEmailPw()(req, res, next);
-    await auth.setToken()(req, res, next);
+  beforeEach(async()=>{
+    //register user and obtain ID
+    await pool
+      .query(user.registerUser, [USER.email, USER.password])
+      .then(res=>{
+        USER.userID = res.rows[0].user_id
+        console.log("User registered, userID:", USER.userID)
+      })
+      .catch(e=>{console.log("User registration failed:", e)})
+
+    //insert a session and obtain token
+    await pool
+      .query(user.insertSession, [USER.userID, "1234", Date.now()+100000])
+      .then(()=>{USER.tokenValue = "1234"})
   })
 
+  afterEach(async ()=>{
+    await pool
+    .query(`DELETE FROM auth WHERE user_id = $1`, [USER.userID])
+    .then(()=>{
+      USER1.userID = undefined
+      console.log("userID cleared:", USER1.userID)
+    })
+    .catch(e=>{console.log("delete user auth failed")})
 
-  test("", async () =>{
-    const res = resMock();
-    const next = nextMock();
-    await auth.verifyToken()(req, res, next);
+  await pool
+    .query(`SELECT * FROM auth;`)
+    .then(res=>{console.log("auth table should be empty:", res.rows)})
+
+  })
+
+  test("valid token", async () =>{
+    const req = reqMock({
+      tokenValue: USER.tokenValue,
+      userID: USER.userID
+    });
+    const {res, next} = resMock();
+    await auth.verifyToken()(req, res, next); //test middleware
     expect(next).toHaveBeenCalledTimes(1)
-    expect(res.status).toHaveBeenCalledTimes(0);
+    expect(res.status).toHaveBeenCalledTimes(0)
     expect(res.send).toHaveBeenCalledTimes(0);
   })
-})
 
-describe("test verifyToken, inexistent token", ()=>{
-  const req = reqMock(USER2.cred[0], USER2.cred[1])
-  
-
-  beforeAll(async () =>{
-     const next = nextMock();
-     const res = resMock();
-     await auth.verifyEmailPw()(req, res, next);
-     await auth.setToken()(req, res, next);
-     req.tokenValue = undefined
-   })
-
-   afterAll(async ()=>{
-    await pool.query(user.rmSession, [USER2.userID]);
-   })
-
-
-  test("", async () =>{
-    expect(1).toBe(1);
-    const res = resMock();
-    const next = nextMock();
-    await auth.verifyToken()(req, res, next)
-
+  test("inexistent token", async()=>{
+    const req = reqMock({
+      userID: USER.userID
+    });
+    const {res, next} = resMock();
+    await auth.verifyToken()(req, res, next); //test middleware
     expect(next).toHaveBeenCalledTimes(0)
-    expect(res.status).toHaveBeenCalledTimes(1);
-    expect(res.send).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.send).toHaveBeenCalledWith("token header not included");
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(res.send).toHaveBeenCalledWith("token header not included")
+
   })
-})
 
-describe("test verifyToken, invalid token", ()=>{
-  const req = reqMock(USER2.cred[0], USER2.cred[1])
-  
-
-  beforeAll(async () =>{
-     const next = nextMock();
-     const res = resMock();
-     await auth.verifyEmailPw()(req, res, next);
-     await auth.setToken()(req, res, next);
-     req.tokenValue = "randomvalue"
-   })
-
-   afterAll(async () =>{
-    await pool.query(user.rmSession, [USER2.userID])
-   })
-
-
-  test("", async () =>{
-    expect(1).toBe(1);
-    const res = resMock();
-    const next = nextMock();
-    await auth.verifyToken()(req, res, next)
+  test("invalid token", async()=>{
+    const req = reqMock({
+      userID: USER.userID,
+      tokenValue: "random"
+    });
+    const {res, next} = resMock();
+    await auth.verifyToken()(req, res, next); //test middleware
     expect(next).toHaveBeenCalledTimes(0)
-    expect(res.status).toHaveBeenCalledTimes(1);
-    expect(res.send).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.send).toHaveBeenCalledWith("invalid or expired token");
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(res.send).toHaveBeenCalledWith("invalid or expired token")
   })
+
+  test("forget to include userID", async()=>{
+    const req = reqMock({
+      tokenValue: USER.tokenValue
+    });
+    const {res, next} = resMock();
+    await auth.verifyToken()(req, res, next); //test middleware
+    expect(next).toHaveBeenCalledTimes(0)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(res.send).toHaveBeenCalledWith("userID not included in header")
+  })
+
 })

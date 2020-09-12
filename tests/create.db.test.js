@@ -1,3 +1,6 @@
+//turn off logging: 
+console.log = () =>{}
+
 const EXPECTED_TABLES = [
   'auth',
   'cart',

@@ -1,3 +1,6 @@
+//turn off logging: 
+console.log = () =>{}
+
 const path = require("path");
 const {Pool} = require("pg");
 const create = require("../database/create.js");
@@ -34,9 +37,9 @@ afterAll(async ()=>{
 
 test("add items to cart then remove", async ()=>{
   const itemsToInsert = [
-    [1, USER_ID, 1],
-    [2, USER_ID, 3],
-    [3, USER_ID, 2]
+    [USER_ID, 1, 1],
+    [USER_ID, 2, 3],
+    [USER_ID, 3, 2]
   ]
   const itemsAfterInsert = [
     { item_id: 1, count: 1 },
