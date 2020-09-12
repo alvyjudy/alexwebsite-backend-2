@@ -58,7 +58,7 @@ describe("test register route", ()=>{
   })
 })
 
-describe.only("test login route", ()=>{
+describe("test login route", ()=>{
   //precondition: test register route must succeed
   let userID;
   const USER = {
