@@ -6,9 +6,6 @@ const SCHEMA = "test_schema_auth_register_user_unit";
 const axios = require("./axios.js");
 const {createHttpTerminator} = require("http-terminator");
 
-const USER1 = {email: 'user1@yahoo.com', password: 'abcdefg'}
-const USER2 = {email: 'user2@yahoo.com', password: 'ddddd'}
-
 const app = require("../server/app.js");
 const server = app.listen();
 const ENDPOINT = "http://localhost:" + server.address().port;
@@ -34,42 +31,20 @@ afterAll(async ()=>{
   pool.end();
 })
 
-describe("test set up", ()=>{
-  test("ping", async ()=>{
-    res = await axios({
-      method: 'get',
-      url: ENDPOINT + "/ping",
-      data: {
-        email: USER1.email,
-        password: USER1.password
-      }
-    })
-    expect(res.status).toBe(200);
-    expect(res.data).toBe("Hello world");
-  })
-
-  test("time", async ()=>{
-    res = await axios({
-      method: 'get',
-      url: ENDPOINT + "/time",
-      data: {
-        email: USER1.email,
-        password: USER1.password
-      }
-    })
-    expect(res.status).toBe(200);
-    expect(res.data).toBeDefined();
-  })
-})
 
 describe("test register route", ()=>{
+  const USER = {
+    email: 'hello@gmail.com',
+    password: '1234'
+  }
+
   test("register user", async ()=>{
     res = await axios({
       method:'post',
       url: ENDPOINT + '/register',
       data: {
-        email: USER1.email,
-        password: USER1.password
+        email: USER.email,
+        password: USER.password
       }
     })
     userID = res.data
@@ -81,15 +56,20 @@ describe("test register route", ()=>{
 })
 
 describe.only("test login route", ()=>{
+  //precondition: test register route must succeed
   let userID;
+  const USER = {
+    email: 'hello@gmail.com',
+    password: '1234'
+  }
 
   beforeAll(async ()=>{
     const res = await axios({
       method:'post',
       url: ENDPOINT + '/register',
       data: {
-        email: USER1.email,
-        password: USER1.password
+        email: USER.email,
+        password: USER.password
       }
     })
     userID = res.data
@@ -105,8 +85,8 @@ describe.only("test login route", ()=>{
       url: ENDPOINT + '/login',
       headers: {"Content-Type":"application/json"},
       data: {
-        email: USER1.email,
-        password: USER1.password
+        email: USER.email,
+        password: USER.password
       }
     })
     const tokenValue = res.data
@@ -115,6 +95,11 @@ describe.only("test login route", ()=>{
 })
 
 describe("test check-token route", ()=>{
+  const USER = {
+    email: 'hello@gmail.com',
+    password: '1234'
+  }
+
   let userID;
   let tokenValue;
 
@@ -123,8 +108,8 @@ describe("test check-token route", ()=>{
       method:'post',
       url: ENDPOINT + '/register',
       data: {
-        email: USER1.email,
-        password: USER1.password
+        email: USER.email,
+        password: USER.password
       }
     })
     userID = registerRes.data
@@ -133,8 +118,8 @@ describe("test check-token route", ()=>{
       url: ENDPOINT + '/login',
       headers: {"Content-Type":"application/json"},
       data: {
-        email: USER1.email,
-        password: USER1.password
+        email: USER.email,
+        password: USER.password
       }})
     tokenValue = loginRes.data
   })
