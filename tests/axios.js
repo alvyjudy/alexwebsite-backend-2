@@ -5,8 +5,8 @@ module.exports = async (req)=>{
     res = await axios(req)
   } catch(e) {
     console.log("Failure on:", req, 
-    "\n\nResponse object:", res, 
-    "\n\nError message:", e)
+    "\n\nResponse:", e.response)
+    res = e.response
   } 
   return res
 }
