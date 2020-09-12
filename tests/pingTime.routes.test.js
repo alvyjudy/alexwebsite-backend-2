@@ -35,11 +35,7 @@ describe("test set up", ()=>{
   test("ping", async ()=>{
     res = await axios({
       method: 'get',
-      url: ENDPOINT + "/ping",
-      data: {
-        email: USER1.email,
-        password: USER1.password
-      }
+      url: ENDPOINT + "/ping"
     })
     expect(res.status).toBe(200);
     expect(res.data).toBe("Hello world");
@@ -48,11 +44,7 @@ describe("test set up", ()=>{
   test("time", async ()=>{
     res = await axios({
       method: 'get',
-      url: ENDPOINT + "/time",
-      data: {
-        email: USER1.email,
-        password: USER1.password
-      }
+      url: ENDPOINT + "/time"
     })
     expect(res.status).toBe(200);
     expect(res.data).toBeDefined();
