@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const pool = require("./db.js");
 const auth = require("./auth.js");
+const shop = require("./shop.js");
 const dbUser = require('../database/user.js');
 
 app.get('/ping', (req, res)=>{
@@ -35,6 +36,17 @@ app.post("/check-token",
   (req, res) => {
     res.status(200).send("Valid token")
   }
+)
+
+app.get("/get-user-cart",
+  auth.verifyToken(),
+  shop.getUserCart()
+)
+
+app.post("/update-user-cart",
+  express.json(),
+  auth.verifyToken(),
+  shop.updateUserCart()
 )
 
 module.exports = app;
