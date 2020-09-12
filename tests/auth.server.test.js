@@ -1,3 +1,6 @@
+//turn off logging: 
+console.log = () =>{}
+
 const axios = require('axios');
 const {createHttpTerminator} = require("http-terminator");
 const create = require("../database/create.js");

@@ -1,3 +1,6 @@
+//turn off logging: 
+console.log = () =>{}
+
 const pool = require("../server/db.js");
 const create = require("../database/create.js");
 const user = require("../database/user.js");

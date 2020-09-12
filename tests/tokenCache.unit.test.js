@@ -1,3 +1,6 @@
+//turn off logging: 
+console.log = () =>{}
+
 const cachedTokens = require("../server/cachedTokens.js")
 
 afterEach(()=>{

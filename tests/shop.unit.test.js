@@ -1,3 +1,6 @@
+//turn off logging: 
+console.log = () =>{}
+
 const path = require("path");
 require("dotenv").config({path:path.resolve(path.dirname(__filename), ".env")});
 

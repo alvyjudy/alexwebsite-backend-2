@@ -1,3 +1,6 @@
+//turn off logging: 
+console.log = () =>{}
+
 const path = require("path");
 const {Client, Pool} = require("pg");
 const create = require("../database/create.js");
