@@ -24,14 +24,33 @@ const USER3 = {
   token: undefined
 }
 
-const reqMock = (email, password, tokenValue, tokenExpiry, userID) => {
-  const reqObj = {
-    body: {email, password},
-    tokenValue,
-    tokenExpiry,
+const reqMock = (valuePair) => {
+  const {email, 
+    password, 
+    tokenValue, 
+    tokenExpiry, 
     userID,
-    get: (field)=>reqObj[field]
+    cartItems
+  } = valuePair;
+
+  const get = (field) => {
+    return reqObj.headers[field]
   }
+
+  const reqObj = {
+    body:{
+      email: email,
+      password: password,
+      cartItems
+    },
+    headers:{
+      "Token-Value": tokenValue,
+      "User-ID": userID,
+      "Content-Type": "application/json"
+    },
+    get
+  }
+  
   return reqObj
 }
 
@@ -90,16 +109,22 @@ test("check id", ()=>{
 
 describe("test verifyEmailPw", ()=>{
   test("user 1, correct email, correct password", async ()=>{
-    const req = reqMock(USER1.cred[0], USER1.cred[1], undefined, undefined)
+    const req = reqMock({
+      email: USER1.cred[0], 
+      password: USER1.cred[1]
+    })
     const res = resMock();
     const next = nextMock();
     await auth.verifyEmailPw()(req, res, next);
     expect(next).toHaveBeenCalledTimes(1);
-    expect(req.userID).toBe(USER1.userID);
+    expect(req.get("User-ID")).toBe(USER1.userID);
   })
 
   test("user 1, correct email, incorrect password", async ()=>{
-    const req = reqMock(USER1.cred[0], "random", undefined, undefined)
+    const req = reqMock({
+      email: USER1.cred[0], 
+      password: "random"
+    })
     const res = resMock();
     const next = nextMock();
     await auth.verifyEmailPw()(req, res, next);
@@ -114,17 +139,15 @@ describe("user1, test setToken", ()=>{
   })
 
   test("set token", async () => {
-    const req = reqMock(undefined, undefined, undefined, undefined, USER1.userID);
+    const req = reqMock({userID: USER1.userID});
     const res = resMock();
     const next = nextMock();
     await auth.setToken()(req, res, next);
-    expect(req.tokenValue).toBeDefined();
-    expect(req.tokenExpiry).toBeDefined();
+    expect(req.get("Token-Value")).toBeDefined();
     const {token_value: tokenValue, expiry: tokenExpiry} = (
       await pool.query(user.getSession, [USER1.userID])
-    ).rows[0]
-    expect(tokenValue).toBe(req.tokenValue.toString());
-    expect(tokenExpiry).toBe(req.tokenExpiry.toString());
+    ).rows[0] 
+    expect(tokenValue).toBe(req.get("Token-Value").toString());
   })
 })
 
@@ -138,12 +161,15 @@ test("mock res", ()=>{
 })
 
 describe("test verifyToken, valid token", ()=>{
-  const req = reqMock(USER1.cred[0], USER1.cred[1])
+  const req = reqMock({
+    email: USER1.cred[0], 
+    password: USER1.cred[1]})
 
   beforeAll(async () =>{
     const next = nextMock();
     const res = resMock();
     await auth.verifyEmailPw()(req, res, next);
+    console.log(req);
     await auth.setToken()(req, res, next);
   })
 
@@ -159,7 +185,9 @@ describe("test verifyToken, valid token", ()=>{
 })
 
 describe("test verifyToken, inexistent token", ()=>{
-  const req = reqMock(USER2.cred[0], USER2.cred[1])
+  const req = reqMock({
+    email: USER2.cred[0], 
+    password: USER2.cred[1]})
   
 
   beforeAll(async () =>{
@@ -167,7 +195,7 @@ describe("test verifyToken, inexistent token", ()=>{
      const res = resMock();
      await auth.verifyEmailPw()(req, res, next);
      await auth.setToken()(req, res, next);
-     req.tokenValue = undefined
+     req.headers["Token-Value"] = undefined
    })
 
    afterAll(async ()=>{
@@ -190,7 +218,8 @@ describe("test verifyToken, inexistent token", ()=>{
 })
 
 describe("test verifyToken, invalid token", ()=>{
-  const req = reqMock(USER2.cred[0], USER2.cred[1])
+  const req = reqMock({
+    email: USER2.cred[0], password: USER2.cred[1]})
   
 
   beforeAll(async () =>{
@@ -198,7 +227,7 @@ describe("test verifyToken, invalid token", ()=>{
      const res = resMock();
      await auth.verifyEmailPw()(req, res, next);
      await auth.setToken()(req, res, next);
-     req.tokenValue = "randomvalue"
+     req.headers["Token-Value"] = "randomvalue"
    })
 
    afterAll(async () =>{

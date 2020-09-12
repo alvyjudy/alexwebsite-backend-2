@@ -80,7 +80,7 @@ describe("test register route", ()=>{
   })
 })
 
-describe("test login route", ()=>{
+describe.only("test login route", ()=>{
   let userID;
 
   beforeAll(async ()=>{
@@ -149,8 +149,8 @@ describe("test check-token route", ()=>{
       url: ENDPOINT + '/check-token',
       headers: {
         "Content-Type":"application/json",
-        "tokenValue":tokenValue,
-        "userID": userID
+        "Token-Value":tokenValue,
+        "User-ID": userID
         }
     }); 
     expect(res.status).toBe(200);
