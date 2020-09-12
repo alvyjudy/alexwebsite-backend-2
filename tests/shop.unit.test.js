@@ -16,13 +16,24 @@ const reqMock = (valuePair) => {
     cartItems
   } = valuePair;
 
-  const reqObj = {
-    body: {email, password, cartItems},
-    tokenValue,
-    tokenExpiry,
-    userID,
-    get: (field)=>reqObj[field]
+  const get = (field) => {
+    return reqObj.headers[field]
   }
+
+  const reqObj = {
+    body:{
+      email: email,
+      password: password,
+      cartItems
+    },
+    headers:{
+      "Token-Value": tokenValue,
+      "User-ID": userID,
+      "Content-Type": "application/json"
+    },
+    get
+  }
+  
   return reqObj
 }
 
@@ -169,13 +180,14 @@ describe("test updateUserCart", ()=>{
         USER1.userID = res.rows[0].user_id
         console.log("User registered, userID:", USER1.userID)
       })
+      .catch(e=>{console.log("User registration failed:", e)})
 
     //add items to cart
     const client = await pool.connect()
     USER1.itemSetOne.forEach(item=>{
       client.query(user.addItemToCart, [USER1.userID, item.itemID, item.count])
     })
-    await client.release();
+    await client.release()
 
     //check items are inserted
     await pool
@@ -193,6 +205,7 @@ describe("test updateUserCart", ()=>{
         USER1.userID = undefined
         console.log("userID cleared:", USER1.userID)
       })
+      .catch(e=>{console.log("delete user auth failed")})
 
     await pool
       .query(`SELECT * FROM auth;`)
@@ -207,7 +220,7 @@ describe("test updateUserCart", ()=>{
   test("",async ()=>{
     const req = reqMock({
       cartItems: USER1.itemSetTwo,
-      userID: USER1.userID
+      userID: USER1.userID  
     })
     const {res} = resMock();
     const next = nextMock();
