@@ -159,3 +159,82 @@ describe("test get-user-cart & update-user-cart route", ()=>{
     console.log("Item set 2:", secondGet.data)
   })
 })
+
+describe("test token issue", () => {
+  const USER = {
+    email: 'user1@gmail.com', 
+    password: 'abcd',
+    userID: undefined,
+    tokenValue: undefined,
+    itemSetOne: [
+      {itemID: 1, count: 3},
+      {itemID: 2, count: 1}, 
+      {itemID: 3, count: 3},
+      {itemID: 4, count: 3}, 
+    ],
+    itemSetTwo: [
+      {itemID: 1, count: 3}, 
+      {itemID: 2, count: 4}, 
+      {itemID: 30, count: 1}, 
+    ]
+  }
+
+  beforeEach(async()=>{
+    //register
+    USER.userID = (await axios({
+      method: 'post', 
+      url: ENDPOINT + '/register',
+      headers: {"Content-Type":"application/json"},
+      data: {
+        email: USER.email,
+        password: USER.password
+      } 
+    })).data
+    console.log(USER.userID);
+    //login and get token
+    USER.tokenValue = (await axios({
+      method: 'post',
+      url: ENDPOINT + '/login',
+      headers:{'Content-Type':'application/json'},
+      data:{
+        email:USER.email,
+        password:USER.password
+      }
+    })).data
+    console.log(USER.tokenValue)
+
+    
+  })
+  afterEach(async () =>{
+    //remove registration
+    await pool.query(`DELETE FROM auth WHERE user_id = $1`, [USER.userID])
+    await pool.query(`SELECT * FROM auth;`)
+    .then(res=>{console.log("auth table should be empty:", res.rows)})
+  })
+
+  test("no token included", async()=>{
+    const res = await axios({
+      method: 'get',
+      url: ENDPOINT + '/get-user-cart',
+      headers: {
+        'Content-Type':'application/json',
+        'User-ID':USER.userID
+      }
+    })
+    expect(res.status).toBe(403);
+    expect(res.data).toBe("Token header not included")
+  })
+
+  test("No userID included", async ()=>{
+    const res = await axios({
+      method: 'get',
+      url: ENDPOINT + '/get-user-cart',
+      headers: {
+        'Content-Type':'application/json',
+        'Token-Value':USER.tokenValue
+      }
+    })
+    expect(res.status).toBe(403);
+    expect(res.data).toBe("userID not included in header")
+  })
+})
