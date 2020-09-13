@@ -20,8 +20,8 @@ module.exports = {
     ON DELETE CASCADE
   );`,
   checkedOut: `CREATE TABLE IF NOT EXISTS checked_out (
-    item_id INT PRIMARY KEY,
     order_id INT,
+    item_id INT,
     count INT,
     FOREIGN KEY (order_id) REFERENCES orders(order_id) 
     ON DELETE CASCADE
