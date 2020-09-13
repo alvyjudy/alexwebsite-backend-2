@@ -9,7 +9,6 @@ const create = require("../database/create.js");
 const axios = require("./axios.js");
 const {createHttpTerminator} = require("http-terminator");
 const app = require("../server/app.js");
-const { addItemToCart } = require("../database/user.js");
 
 
 const SCHEMA = "schema_shop_routes_test";
