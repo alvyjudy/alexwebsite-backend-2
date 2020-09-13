@@ -10,7 +10,7 @@ module.exports = {
       console.log("Query failed to execute:", 
         "\u001b[31;1m", text, "\u001b[0;m",
         "params:", params, "\n\nError message", e);
-      throw Error("Database operation failed!")
+      throw Error("Database operation failed!\n\n"+e.toString())
     }
     return res
   },
