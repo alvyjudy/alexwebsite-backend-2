@@ -32,7 +32,7 @@ module.exports = {
     ($1, $2, $3) returning order_id;`,
 
   addItemToOrder: `INSERT INTO checked_out 
-    (item_id, order_id, count) VALUES
+    (order_id, item_id, count) VALUES
     ($1, $2, $3);`,
 
   getOrderDetail: `SELECT 

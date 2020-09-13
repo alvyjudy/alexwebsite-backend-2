@@ -3,6 +3,7 @@ const app = express();
 const pool = require("./db.js");
 const auth = require("./auth.js");
 const shop = require("./shop.js");
+const orders = require("./orders.js");
 const dbUser = require('../database/user.js');
 
 app.get('/ping', (req, res)=>{
@@ -44,6 +45,27 @@ app.post("/update-user-cart",
   express.json(),
   auth.verifyToken(),
   shop.updateUserCart()
+)
+
+app.get("/get-user-orders",
+  auth.verifyToken(),
+  orders.getUserOrders()
+)
+
+app.get("/get-order-detail",
+  auth.verifyToken(),
+  orders.getOrderDetail()
+)
+
+app.post("/create-order",
+  express.json(),
+  auth.verifyToken(),
+  orders.createOrder()
+)
+
+app.get("/remove-order",
+  auth.verifyToken(),
+  orders.removeOrder()
 )
 
 module.exports = app;

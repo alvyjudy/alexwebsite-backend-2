@@ -40,9 +40,9 @@ test('1 user placing 1 order', async ()=>{
   ORDER = [USER_ID, "1 Bloor St", "1haiwnx"];
   ORDER_ID = (await client.query(user.createOrder, ORDER)).rows[0].order_id;
   ITEMS = [
-    [1, ORDER_ID, 2],
-    [2, ORDER_ID, 4],
-    [9, ORDER_ID, 1]
+    [ORDER_ID, 1, 2],
+    [ORDER_ID, 2, 4],
+    [ORDER_ID, 9, 1]
   ];
 
 
@@ -53,7 +53,7 @@ test('1 user placing 1 order', async ()=>{
   let itemsInOrder = []
   const orderDetail = (await client.query(user.getOrderDetail, [ORDER_ID])).rows;
   orderDetail.forEach(item=>{
-    itemsInOrder.push([item.item_id, ORDER_ID, item.count])
+    itemsInOrder.push([ORDER_ID, item.item_id, item.count])
   })
   const userOrderInfo = Object.values(orderDetail[0]).slice(0,3);
 
