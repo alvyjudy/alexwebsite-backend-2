@@ -230,7 +230,7 @@ describe("test verifyToken middleware", ()=>{
     await auth.verifyToken()(req, res, next); //test middleware
     expect(next).toHaveBeenCalledTimes(0)
     expect(res.status).toHaveBeenCalledWith(403)
-    expect(res.send).toHaveBeenCalledWith("token header not included")
+    expect(res.send).toHaveBeenCalledWith("Token header not included")
 
   })
 
