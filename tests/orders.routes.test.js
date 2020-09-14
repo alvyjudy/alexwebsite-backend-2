@@ -2,7 +2,8 @@
 console.log = () =>{}
 
 const path = require("path");
-require("dotenv").config({path:path.resolve(path.dirname(__filename), ".env")});
+const ENVFILE = process.env.TESTENV === "cloud" ? ".env.cloud" : ".env.local"
+require("dotenv").config({path:path.resolve(path.dirname(__filename), ENVFILE)});
 
 const pool = require("../server/db.js");
 const create = require("../database/create.js");

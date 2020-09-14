@@ -16,7 +16,8 @@ const SCHEMA = "test_schema_create";
 const path = require("path");
 const {Client} = require("pg");
 const actions = require("../database/create.js");
-require("dotenv").config({path:path.resolve(path.dirname(__filename), ".env")});
+const ENVFILE = process.env.TESTENV === "cloud" ? ".env.cloud" : ".env.local"
+require("dotenv").config({path:path.resolve(path.dirname(__filename), ENVFILE)});
 
 const client = new Client();
 
