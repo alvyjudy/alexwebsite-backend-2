@@ -3,7 +3,8 @@ console.log = () =>{}
 
 const pool = require("../server/db.js");
 const path = require("path");
-require("dotenv").config({path:path.resolve(path.dirname(__filename), ".env")});
+const ENVFILE = process.env.TESTENV === "cloud" ? ".env.cloud" : ".env.local"
+require("dotenv").config({path:path.resolve(path.dirname(__filename), ENVFILE)});
 const create = require("../database/create.js");
 const SCHEMA = "test_schema_auth_register_user_unit";
 const axios = require("./axios.js");

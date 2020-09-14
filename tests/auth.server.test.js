@@ -8,7 +8,8 @@ const user = require("../database/user.js");
 const path = require("path");
 
 
-require("dotenv").config({path:path.resolve(path.dirname(__filename), ".env")});
+const ENVFILE = process.env.TESTENV === "cloud" ? ".env.cloud" : ".env.local"
+require("dotenv").config({path:path.resolve(path.dirname(__filename), ENVFILE)});
 const app = require("../server/app.js");
 const pool = require("../server/db.js");
 const server = app.listen();
