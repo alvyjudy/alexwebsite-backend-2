@@ -38,7 +38,10 @@ const setToken = () => async (req, res, next) => {
   const {tokenValue, tokenExpiry} = tokenGen();
   await pool.query(user.insertSession, [userID, tokenValue, tokenExpiry]);
   
-  res.status(200).json(tokenValue.toString())
+  res.status(200).json({
+    tokenValue: tokenValue.toString(),
+    userID: userID
+  })
 }
 
 const verifyToken = () => async (req, res, next) => {
