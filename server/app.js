@@ -6,11 +6,13 @@ const shop = require("./shop.js");
 const orders = require("./orders.js");
 const dbUser = require('../database/user.js');
 
-app.get('/ping', (req, res)=>{
+const router = express.Router();
+
+router.get('/ping', (req, res)=>{
   res.status(200).send("Hello world");
 })
 
-app.get("/time", async (req, res)=>{
+router.get("/time", async (req, res)=>{
   const client = await pool.connect();
   const time = (await client.query(`SELECT NOW();`)).rows[0];
   console.log(time);
@@ -18,54 +20,56 @@ app.get("/time", async (req, res)=>{
   client.release();
 })
 
-app.post("/register",
+router.post("/register",
   express.json(),
   auth.registerUser()
 )
 
-app.post("/login", 
+router.post("/login", 
   express.json(), 
   auth.verifyEmailPw(),
   auth.setToken()
 )
 
-app.post("/check-token",
+router.post("/check-token",
   auth.verifyToken(),
   (req, res) => {
     res.status(200).send("Valid token")
   }
 )
 
-app.get("/get-user-cart",
+router.get("/get-user-cart",
   auth.verifyToken(),
   shop.getUserCart()
 )
 
-app.post("/update-user-cart",
+router.post("/update-user-cart",
   express.json(),
   auth.verifyToken(),
   shop.updateUserCart()
 )
 
-app.get("/get-user-orders",
+router.get("/get-user-orders",
   auth.verifyToken(),
   orders.getUserOrders()
 )
 
-app.get("/get-order-detail",
+router.get("/get-order-detail",
   auth.verifyToken(),
   orders.getOrderDetail()
 )
 
-app.post("/create-order",
+router.post("/create-order",
   express.json(),
   auth.verifyToken(),
   orders.createOrder()
 )
 
-app.get("/remove-order",
+router.get("/remove-order",
   auth.verifyToken(),
   orders.removeOrder()
 )
+
+app.use('/api', router)
 
 module.exports = app;
